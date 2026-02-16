@@ -1,0 +1,14 @@
+@import url('https://fonts.googleapis.com/css2?family=Zalando+Sans+SemiExpanded:ital,wght@0,200..900;1,200..900&display=swap');
+@import "tailwindcss";
+@font-face {
+    font-family: "Zalando Sans SemiExpanded";
+    src: url('/assets/Zalando_Sans_SemiExpanded/ZalandoSansSemiExpanded-VariableFont_wght.ttf');
+}
+@theme{
+    --font-primary: "Zalando Sans SemiExpanded", "sans-serif";
+    --color-text: #e4e4e4;
+}
+
+:root {
+    background-color: var(--color-slate-950);
+}

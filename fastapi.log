@@ -1,0 +1,12 @@
+2026-01-04 17:49:23,437 [INFO] Use pytorch device_name: mps
+2026-01-04 17:49:23,437 [INFO] Load pretrained SentenceTransformer: /Users/wiktorosior/Desktop/Personal_projects/Optinun/scrapebot/mmlw-retrieval-roberta-large-v2
+2026-01-04 17:49:25,105 [INFO] Started server process [89848]
+2026-01-04 17:49:25,105 [INFO] Waiting for application startup.
+2026-01-04 17:49:25,105 [INFO] Application startup complete.
+2026-01-04 17:50:11,270 [INFO] 3 changes detected
+2026-01-04 17:50:15,976 [INFO] 1 change detected
+2026-01-04 17:50:18,953 [INFO] Shutting down
+2026-01-04 17:50:19,059 [INFO] Waiting for application shutdown.
+2026-01-04 17:50:19,061 [INFO] Application shutdown complete.
+2026-01-04 17:50:19,062 [INFO] Finished server process [89848]
+2026-01-04 17:50:19,448 [INFO] Stopping reloader process [89760]

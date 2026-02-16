@@ -1,0 +1,119 @@
+
+services:
+  # ----------------------------------------------------------------
+  # 1. BAZA DANYCH (PostgreSQL + pgvector)
+  # ----------------------------------------------------------------
+  postgres-db:
+    image: pgvector/pgvector:pg16  # Wersja ze wsparciem dla wektorów
+    container_name: postgres-db
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - db_data:/var/lib/postgresql/data
+      - ./db_init/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - app-network
+    restart: always
+    ports:
+      - "5432:5432"
+
+  # ----------------------------------------------------------------
+  # 2. BACKEND (Spring Boot)
+  # ----------------------------------------------------------------
+  spring-boot-app:
+    build: ./backend
+    container_name: spring-boot-app
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      # Łączy się z serwisem 'postgres-db' zdefiniowanym wyżej
+      DB_HOST: postgres-db
+      ALLOWED_ORIGIN: "*"         # Wewnątrz sieci Docker ufamy Nginxowi
+    depends_on:
+      - postgres-db
+    networks:
+      - app-network
+    restart: always
+
+  # ----------------------------------------------------------------
+  # 3. AI API (FastAPI Python - Wyszukiwarka)
+  # ----------------------------------------------------------------
+  fastapi-service:
+    build: ./fastapi   # Szuka Dockerfile w folderze /fastapi
+    container_name: fastapi-service
+    volumes:
+      # Montujemy folder z modelem z Twojego dysku (po lewej) do kontenera (po prawej)
+      # Dzięki temu nie budujemy gigantycznego obrazu Docker
+      - ./mmlw-retrieval-roberta-large-v2:/app/mmlw-retrieval-roberta-large-v2
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      DB_HOST: postgres-db
+      # Ścieżka wewnątrz kontenera (musi pasować do volumes powyżej)
+      MODEL_PATH: /app/mmlw-retrieval-roberta-large-v2
+    depends_on:
+      - postgres-db
+    networks:
+      - app-network
+    restart: always
+
+  # ----------------------------------------------------------------
+  # 4. SCRAPER (Python - Działa w tle)
+  # ----------------------------------------------------------------
+  scraper-service:
+    build: ./scrapebot   # Szuka Dockerfile w folderze /scraper
+    container_name: scraper-service
+    volumes:
+      # Scraper też potrzebuje modelu do tworzenia embeddingów
+      - ./mmlw-retrieval-roberta-large-v2:/app/mmlw-retrieval-roberta-large-v2
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      DB_HOST: postgres-db
+      MODEL_PATH: /app/mmlw-retrieval-roberta-large-v2
+    depends_on:
+      - postgres-db
+    networks:
+      - app-network
+    restart: always
+
+  # ----------------------------------------------------------------
+  # 5. FRONTEND (React + Nginx - Brama Wejściowa)
+  # ----------------------------------------------------------------
+  react-frontend:
+    build: ./frontend
+    container_name: frontend
+    ports:
+      # To jedyny port wystawiony na świat! (http://localhost)
+      - "80:80"
+    depends_on:
+      - spring-boot-app
+      - fastapi-service
+    networks:
+      - app-network
+    restart: always
+# -------------------------------------------------------
+  # 6. CLOUDFLARE TUNNEL (Magiczny łącznik)
+  # -------------------------------------------------------
+  tunnel:
+    image: cloudflare/cloudflared:latest
+    container_name: cloudflared-tunnel
+    restart: always
+    command: tunnel run
+    environment:
+      - TUNNEL_TOKEN=${TUNNEL_TOKEN} # Token pobierzemy z .env
+    networks:
+      - app-network
+# ----------------------------------------------------------------
+# WSPÓŁDZIELONE ZASOBY
+# ----------------------------------------------------------------
+volumes:
+  db_data:  # Trwałość danych bazy po restarcie
+
+networks:
+  app-network:
+    driver: bridge
