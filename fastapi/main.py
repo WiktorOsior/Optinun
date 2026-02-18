@@ -64,6 +64,7 @@ async def similarity(input: str):
                 SELECT link, title, description, img, agency, pubDate, cluster_id FROM articles 
                 WHERE 1 - (embedding <=> %s::vector ) > 0.6 
                 ORDER BY 1 - (embedding <=> %s::vector) DESC 
+                LIMIT 20
                 """,(
                     embedding,
                     embedding

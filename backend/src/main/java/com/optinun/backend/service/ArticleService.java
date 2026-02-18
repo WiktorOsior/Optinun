@@ -4,6 +4,8 @@ import com.optinun.backend.entity.Article;
 import com.optinun.backend.repository.ArticleRepo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -55,18 +57,6 @@ public class ArticleService {
         return null;
     }
 
-    public Article saveArticle (Article article){
-        Article savedArticle = articleRepo.save(article);
-        log.info("Article with link: {} saved successfully", article.getLink());
-        return savedArticle;
-    }
-    public Article updateArticle (Article article) {
-        Optional<Article> existingArticle = articleRepo.findById(article.getLink());
-        Article updatedArticle = articleRepo.save(article);
-        log.info("Article with link: {} updated successfully", article.getLink());
-        return updatedArticle;
-    }
-
     private final RestTemplate restTemplate = new RestTemplate();
 
     public List<Article> similaritySearch (String input) {
@@ -84,8 +74,14 @@ public class ArticleService {
             return Collections.emptyList();
         }
     }
-
+    public Slice<Article> findDistinctArticlesSlice(Pageable pageable) {
+        return articleRepo.findDistinctArticlesSlice(pageable);
+    }
     public void deleteArticleBylink (String link) {
         articleRepo.deleteById(link);
+    }
+
+    public List<Article> getHottestUniqueFeed() {
+        return articleRepo.findUniqueHottestArticles();
     }
 }

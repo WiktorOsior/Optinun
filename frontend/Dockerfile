@@ -1,16 +1,16 @@
-FROM node:22-alpine AS build
+FROM node:22-alpine
 
 WORKDIR /app
 
-COPY package.json .
+# Install dependencies
+COPY package.json package-lock.json* ./
 RUN npm install
 
+# Copy source code
 COPY . .
-RUN npm run build
 
-# Etap 2: Nginx (bez zmian)
-FROM nginx:alpine
-COPY --from=build /app/dist /usr/share/nginx/html
-COPY nginx.conf /etc/nginx/conf.d/default.conf
-EXPOSE 80
-CMD ["nginx", "-g", "daemon off;"]
+# Expose the Vite/React port
+EXPOSE 5173
+
+# Start the dev server
+CMD ["npm", "run", "dev"]

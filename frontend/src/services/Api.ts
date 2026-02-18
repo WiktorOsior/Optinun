@@ -12,5 +12,7 @@ export const articleService = {
     getOrdered : () => api.get(`/getorderedbycluster`),
     getLatest : () => api.get(`/getlatest`),
     getSimilar : (input: string) => api.get('/getsimilaritysearch', {params: {query: input}}),
+    getFeed: (page: number) => {return axios.get(`/api/feed?page=${page}`);},
+    getHottest:  () => api.get('/gethottest'),
 }
 export default api;

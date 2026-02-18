@@ -4,6 +4,10 @@ import com.optinun.backend.entity.Article;
 import com.optinun.backend.service.ArticleService;
 import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -45,5 +49,16 @@ public class DatabaseController {
     @GetMapping("/getsimilaritysearch")
     public ResponseEntity<List<Article>> getSimilaritySearch(@RequestParam String query){
         return ResponseEntity.ok().body(articleService.similaritySearch(query));
+    }
+
+    @GetMapping("/feed")
+    public ResponseEntity<Slice<Article>> getArticles(@RequestParam(defaultValue = "0") int page) {
+        Pageable pageable = PageRequest.of(page, 20);
+        return ResponseEntity.ok().body(articleService.findDistinctArticlesSlice(pageable));
+    }
+
+    @GetMapping("/gethottest")
+    public ResponseEntity<List<Article>> getHottest(){
+        return ResponseEntity.ok().body(articleService.getHottestUniqueFeed());
     }
 }

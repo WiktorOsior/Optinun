@@ -4,7 +4,7 @@ export interface Article {
     description: string;
     img: string;
     agency: string;
-    pudate: string;
+    pubdate: string;
     cluster_id: number;
 
 

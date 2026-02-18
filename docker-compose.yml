@@ -85,29 +85,23 @@ services:
   # 5. FRONTEND (React + Nginx - Brama Wejściowa)
   # ----------------------------------------------------------------
   react-frontend:
-    build: ./frontend
+    build: 
+      context: ./frontend
+      # dockerfile: Dockerfile.dev  <-- DELETE THIS LINE
     container_name: frontend
     ports:
-      # To jedyny port wystawiony na świat! (http://localhost)
-      - "80:80"
+      - "5173:5173"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    environment:
+      - CHOKIDAR_USEPOLLING=true
     depends_on:
       - spring-boot-app
       - fastapi-service
     networks:
       - app-network
     restart: always
-# -------------------------------------------------------
-  # 6. CLOUDFLARE TUNNEL (Magiczny łącznik)
-  # -------------------------------------------------------
-  tunnel:
-    image: cloudflare/cloudflared:latest
-    container_name: cloudflared-tunnel
-    restart: always
-    command: tunnel run
-    environment:
-      - TUNNEL_TOKEN=${TUNNEL_TOKEN} # Token pobierzemy z .env
-    networks:
-      - app-network
 # ----------------------------------------------------------------
 # WSPÓŁDZIELONE ZASOBY
 # ----------------------------------------------------------------
