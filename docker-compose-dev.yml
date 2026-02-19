@@ -87,7 +87,7 @@ services:
   react-frontend:
     build: 
       context: ./frontend
-      # dockerfile: Dockerfile.dev  <-- DELETE THIS LINE
+      dockerfile: Dockerfile-dev
     container_name: frontend
     ports:
       - "5173:5173"
